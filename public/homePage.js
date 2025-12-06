@@ -2,15 +2,15 @@
 const logoutButton = new LogoutButton();
 
 logoutButton.action = function(callback) {
-    ApiConnector.logout((response) => {
-        if (response.success) {
-            location.reload();
-        }
-        
-        if (callback) {
-            callback(response);
-        }
-    });
+	ApiConnector.logout((response) => {
+		if (response.success) {
+			location.reload();
+		}
+
+		if (callback) {
+			callback(response);
+		}
+	});
 };
 
 ApiConnector.current((response) => {
@@ -36,46 +36,53 @@ setInterval(getCurrencyRates, 60000);
 
 const moneyManager = new MoneyManager();
 
-moneyManager.addMoneyCallback = function(data) {
-	ApiConnector.addMoney(data, (response) => {
-		if (response.success) {
-			ProfileWidget.showProfile(response.data);
-			moneyManager.setMessage(true, 'Баланс успешно пополнен');
-		} else {
-			moneyManager.setMessage(false, response.error);
-		}
-	});
-};
-
-moneyManager.conversionMoneyCallback = function(data) {
-	ApiConnector.convertMoney(data, (response) => {
-		if (response.success) {
-			ProfileWidget.showProfile(response.data);
-			moneyManager.setMessage(true, 'Конвертация выполнена успешно');
-		} else {
-			moneyManager.setMessage(false, response.error);
-		}
-	});
-};
-
 moneyManager.sendMoneyCallback = function(data) {
-	console.log('Данные перевода:', data);
-
-	if (!data.to) {
+	if (!data.to || data.to.trim() === '') {
 		moneyManager.setMessage('Выберите получателя из списка', false);
 		return;
 	}
 
+	if (!data.amount || data.amount <= 0) {
+		moneyManager.setMessage('Введите корректную сумму перевода', false);
+		return;
+	}
+
+	if (!data.currency) {
+		moneyManager.setMessage('Выберите валюту', false);
+		return;
+	}
+
+	const recipient = Number(data.to);
+	const amount = parseFloat((+data.amount).toFixed(2));
+
+	if (isNaN(recipient) || recipient <= 0) {
+		moneyManager.setMessage('Некорректный получатель', false);
+		return;
+	}
+
+	if (isNaN(amount) || amount <= 0) {
+		moneyManager.setMessage('Некорректная сумма перевода', false);
+		return;
+	}
+
+	moneyManager.setMessage('Выполняется перевод...', null);
+
 	ApiConnector.transferMoney({
-		to: Number(data.to),
-		amount: Number(data.amount),
-		currency: data.currency
+		to: recipient,
+		amount: amount,
+		currency: (data.currency || '').trim()
 	}, function(response) {
-		if (response.success) {
+		if (!response) {
+			moneyManager.setMessage('Нет ответа от сервера', false);
+			return;
+		}
+
+		if (response.success && response.data) {
 			ProfileWidget.showProfile(response.data);
 			moneyManager.setMessage('Перевод выполнен!', true);
 		} else {
-			moneyManager.setMessage('Ошибка: ' + response.error, false);
+			const errorMessage = response.error || 'Ошибка при выполнении перевода';
+			moneyManager.setMessage(errorMessage, false);
 		}
 	});
 };

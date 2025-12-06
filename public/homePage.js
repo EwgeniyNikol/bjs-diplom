@@ -1,12 +1,11 @@
 'use strict';
-const logoutButton = new LogoutButton();
 
+const logoutButton = new LogoutButton();
 logoutButton.action = function(callback) {
 	ApiConnector.logout((response) => {
 		if (response.success) {
 			location.reload();
 		}
-
 		if (callback) {
 			callback(response);
 		}
@@ -31,19 +30,13 @@ function getCurrencyRates() {
 }
 
 getCurrencyRates();
-
 setInterval(getCurrencyRates, 60000);
 
 const moneyManager = new MoneyManager();
 
 moneyManager.sendMoneyCallback = function(data) {
-	if (!data.to || data.to.trim() === '') {
+	if (!data.to || String(data.to).trim() === '') {
 		moneyManager.setMessage('Выберите получателя из списка', false);
-		return;
-	}
-
-	if (!data.amount || data.amount <= 0) {
-		moneyManager.setMessage('Введите корректную сумму перевода', false);
 		return;
 	}
 
@@ -53,7 +46,7 @@ moneyManager.sendMoneyCallback = function(data) {
 	}
 
 	const recipient = Number(data.to);
-	const amount = parseFloat((+data.amount).toFixed(2));
+	const amount = parseFloat(Number(data.amount).toFixed(2));
 
 	if (isNaN(recipient) || recipient <= 0) {
 		moneyManager.setMessage('Некорректный получатель', false);
@@ -61,7 +54,7 @@ moneyManager.sendMoneyCallback = function(data) {
 	}
 
 	if (isNaN(amount) || amount <= 0) {
-		moneyManager.setMessage('Некорректная сумма перевода', false);
+		moneyManager.setMessage('Введите корректную сумму перевода', false);
 		return;
 	}
 
@@ -70,7 +63,7 @@ moneyManager.sendMoneyCallback = function(data) {
 	ApiConnector.transferMoney({
 		to: recipient,
 		amount: amount,
-		currency: (data.currency || '').trim()
+		currency: String(data.currency).trim()
 	}, function(response) {
 		if (!response) {
 			moneyManager.setMessage('Нет ответа от сервера', false);
@@ -103,9 +96,9 @@ favoritesWidget.addUserCallback = function(data) {
 			favoritesWidget.clearTable();
 			favoritesWidget.fillTable(response.data);
 			favoritesWidget.updateUsersList(response.data);
-			favoritesWidget.setMessage(true, 'Пользователь добавлен в избранное');
+			favoritesWidget.setMessage('Пользователь добавлен в избранное', true);
 		} else {
-			favoritesWidget.setMessage(false, response.error);
+			favoritesWidget.setMessage(response.error || 'Ошибка при добавлении', false);
 		}
 	});
 };
@@ -116,9 +109,9 @@ favoritesWidget.removeUserCallback = function(data) {
 			favoritesWidget.clearTable();
 			favoritesWidget.fillTable(response.data);
 			favoritesWidget.updateUsersList(response.data);
-			favoritesWidget.setMessage(true, 'Пользователь удален из избранного');
+			favoritesWidget.setMessage('Пользователь удален из избранного', true);
 		} else {
-			favoritesWidget.setMessage(false, response.error);
+			favoritesWidget.setMessage(response.error || 'Ошибка при удалении', false);
 		}
 	});
 };

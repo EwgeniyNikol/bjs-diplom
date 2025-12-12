@@ -6,9 +6,9 @@ logoutButton.action = function(callback) {
 		if (response.success) {
 			location.reload();
 		}
-		if (callback) {
-			callback(response);
-		}
+		// if (callback) {
+		// 	callback(response);
+		// }
 	});
 };
 
@@ -35,28 +35,28 @@ setInterval(getCurrencyRates, 60000);
 const moneyManager = new MoneyManager();
 
 moneyManager.sendMoneyCallback = function(data) {
-	if (!data.to || String(data.to).trim() === '') {
-		moneyManager.setMessage('Выберите получателя из списка', false);
-		return;
-	}
+	// if (!data.to || String(data.to).trim() === '') {
+	// 	moneyManager.setMessage('Выберите получателя из списка', false);
+	// 	return;
+	// }
 
-	if (!data.currency) {
-		moneyManager.setMessage('Выберите валюту', false);
-		return;
-	}
+	// if (!data.currency) {
+	// 	moneyManager.setMessage('Выберите валюту', false);
+	// 	return;
+	// }
 
-	const recipient = Number(data.to);
-	const amount = parseFloat(Number(data.amount).toFixed(2));
+	// const recipient = Number(data.to);
+	// const amount = parseFloat(Number(data.amount).toFixed(2));
 
-	if (isNaN(recipient) || recipient <= 0) {
-		moneyManager.setMessage('Некорректный получатель', false);
-		return;
-	}
+	// if (isNaN(recipient) || recipient <= 0) {
+	// 	moneyManager.setMessage('Некорректный получатель', false);
+	// 	return;
+	// }
 
-	if (isNaN(amount) || amount <= 0) {
-		moneyManager.setMessage('Введите корректную сумму перевода', false);
-		return;
-	}
+	// if (isNaN(amount) || amount <= 0) {
+	// 	moneyManager.setMessage('Введите корректную сумму перевода', false);
+	// 	return;
+	// }
 
 	moneyManager.setMessage('Выполняется перевод...', null);
 
